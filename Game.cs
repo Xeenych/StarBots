@@ -7,7 +7,7 @@ namespace GameLib
 {
     public class Game
     {
-        const int player_timeout  = 100;
+        const int player_timeout = 100;
         public const int xmax = 300;
         public const int ymax = 300;
         public const float vel_max = 10.0f;
@@ -25,7 +25,7 @@ namespace GameLib
             for (int i = 0; i < numstars; i++)
                 startdust.Add(new StarDust(r.Next(-xmax, xmax), r.Next(-ymax, ymax)));
         }
-                        
+
         public GameInfo MakeNewPlayer()
         {
             GameInfo info = new GameInfo();
@@ -36,6 +36,9 @@ namespace GameLib
             keys_to_players.Add(key, p);
             info.Key = key;
             info.MyId = GetPlayerByKey(key).id;
+            info.ShootingCooldown = ShootingCooldown;
+            info.ShipRadius = ShipRadius;
+            info.MaxSpeed = vel_max;
             return info;
         }
 
@@ -62,7 +65,7 @@ namespace GameLib
                 if (tick - p.last_tick > player_timeout)
                     to_remove.Add(k);
             }
-                   
+
             foreach (var key in to_remove) {
                 keys_to_players.Remove(key);
             }
@@ -87,8 +90,8 @@ namespace GameLib
         public void MakeStarDust()
         {
             if (startdust.Count < numstars)
-            for (int i = 0; i < numstars - startdust.Count; i++)
-                startdust.Add(new StarDust(r.Next(-xmax, xmax), r.Next(-ymax, ymax)));
+                for (int i = 0; i < numstars - startdust.Count; i++)
+                    startdust.Add(new StarDust(r.Next(-xmax, xmax), r.Next(-ymax, ymax)));
         }
 
         public void ApplyForce(Player c, Vector2D f)
@@ -149,7 +152,7 @@ namespace GameLib
                 foreach (Player p in keys_to_players.Values)
                 {
                     var dist = Math.Sqrt(p.pos.QDistTo(b.pos));
-                    if (dist < Math.Max(p.r, b.r)) { 
+                    if (dist < Math.Max(p.r, b.r)) {
                         bullets_to_remove.Add(b);
                         players_to_remove.Add(p);
                     }
@@ -186,9 +189,9 @@ namespace GameLib
                     continue;
                 if (!PlayerExists(action.key))
                     continue;
-                
+
                 var p = GetPlayerByKey(action.key);
-                
+
                 ApplyForce(p, action.force);
                 Shoot(p, action);
                 p.last_tick = tick;
@@ -216,33 +219,8 @@ namespace GameLib
 
             return gs;
         }
-        public GameInfo GetInfo() {
-            GameInfo info = new GameInfo();
-            info.ShipRadius = ShipRadius;
-            info.MaxSpeed = vel_max;
-            info.ShootingCooldown = ShootingCooldown;
-            return info; 
-        }
     }
 
-    public class GameState
-    {
-        public GameState(long t)
-        {
-            Tick = t;
-        }
-        public long Tick { get; set; }
-        public List<Player> Players = new List<Player>();
-        public List<StarDust> Dust = new List<StarDust>();
-        public List<Bullet> Bullets = new List<Bullet>();
-        }
-    public class GameInfo
-    {
-        public string Version { get; } = "0.1";
-        public string Key { get; set; }
-        public int MyId { get; set; }
-        public float ShipRadius { get; set; }
-        public float MaxSpeed { get; set; }
-        public int ShootingCooldown { get; set; } 
-    }
+
+
 }
