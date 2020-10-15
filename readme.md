@@ -6,7 +6,7 @@
 
 ![1](img/1.png)
 
-## Соединение с сервером
+## Сервер
 
 Сервер работает по адресу `ws://62.173.140.96:80` по протоколу WebSocket
 
@@ -65,6 +65,60 @@ key - ключ, полученный из сообщения GameInfo
 force - вектор силы, точка плоскости куда лететь кораблю
 
 shoot - сделать ли выстрел. На стрельбу имеется кулдаун. 
+
+## Соединение с сервером. Вариант 1.
+
+Для соединения с сервером вы можете самостоятельно написать WebSocket клиент на любом удобном языке.
+
+## Соединение с сервером. Вариант 2.
+
+Есть графический клиент GuiClient
+
+* <a href=files/GuiClient_src.zip)>files/GuiClient_src.zip - исходники</a>
+* <a href=files/GuiClient_src.zip)>files/GuiClient_exe.zip - бинарник</a>
+
+Графический клиент позволяет соединиться с сервером и поиграть в игру с помощью мыши. Программе необходим .NET 4.6.1
+
+GuiClient может служить как прокси для соединения с игровым сервером. Он умеет читать стандартный ввод и отправлять его на сервер, а на стандартный вывод выводить ответы от сервера.
+
+Также на экране будет видно что вообще происходит в игре.
+
+Таким образом, GuiClient можно запустить из своей программы, перенаправить его ввод и вывод и работать с сервером без WebSockets
+
+Ниже приведу как подключиться к GuiClient на C#
+
+```C#
+static string dir = "d:\\GuiClient\\";
+static string exe = dir+"GuiClient.exe";
+static void Main(string[] args)
+{
+      ProcessStartInfo info = new ProcessStartInfo();
+      info.FileName = exe;
+      info.WorkingDirectory = dir;
+	  info.RedirectStandardInput = true;	// перенаправляем ввод
+      info.RedirectStandardOutput = true;	// перенаправляем вывод
+
+      info.UseShellExecute = false;
+
+       var p = Process.Start(info);		// Запускаем процесс
+       Console.SetIn(p.StandardOutput);	// перенаправляем свой ввод
+       Console.SetOut(p.StandardInput);	// перенаправляем свой вывод
+
+       string l = Console.ReadLine();
+       var i = JsonSerDes.DeserializeGameInfo(l);	// считываем GameInfo
+
+       while (true)
+       {
+           PlayerAction action = new PlayerAction(i.Key, new Vector2D(0, 0));
+           string output = JsonSerDes.Serialize(action);	// Отправляе мдействие
+           
+           Console.WriteLine(output);
+           string state = Console.ReadLine();	// Считываем новое состояние мира
+       }
+ }
+```
+
+
 
 
 
